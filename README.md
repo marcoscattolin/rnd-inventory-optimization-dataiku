@@ -7,7 +7,7 @@ This repo contains code that solves "Inventory optimization problem".
 
 Install the environment first:
 
-     `pipenv install -r requirements.txt`
+     pipenv install -r requirements.txt
 
 
 Below we have written the optimization objective and constraints.
