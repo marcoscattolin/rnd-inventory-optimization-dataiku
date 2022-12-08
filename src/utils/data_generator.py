@@ -3,6 +3,7 @@ from numpy.random import multinomial
 import pandas as pd
 import itertools
 import random
+from pathlib import Path
 
 
 columns_shipping = ['source_node_id', 'destination_node_id', 'cost']
@@ -121,6 +122,8 @@ def generate_demand_nodes(demand_node_number, itemsets, min_mean_demand=5, max_m
 
   return pd.DataFrame(final_mat, columns=columns_demand_nodes)
 
+  
+
 
 
 if __name__ == "__main__":
@@ -165,4 +168,11 @@ if __name__ == "__main__":
     print("Supply size: ", supply.shape)
     print("Demand nodes size: ", demand_nodes.shape)
 
+
+
+    shipping.to_csv("data/shipping.csv", index=False)
+    itemsets.to_csv("data/itemsets.csv", index=False)
+    supply_nodes.to_csv("data/supply_nodes.csv", index=False)
+    supply.to_csv("data/supply.csv", index=False)
+    demand_nodes.to_csv("data/demand_nodes.csv", index=False)
 

@@ -63,11 +63,11 @@ class VariableOptInit():
   def get_itemset_results(self, itemset_id):
 
     if self.status == pywraplp.Solver.OPTIMAL:
-      temp_dict = {(key[0],key[1]): val.solution_value() for (key, val) in self.x.items() if key[2]==0}
+      temp_dict = {(key[0],key[1]): val.solution_value() for (key, val) in self.x.items() if key[2]==itemset_id}
 
       output_x = pd.DataFrame(temp_dict.values(), index=temp_dict.keys()).reset_index()
 
-      return output_x.set_index(['level_0', 'level_1']).unstack().transform(np.abs).to_numpy()
+      return output_x.set_index(['level_0', 'level_1']).unstack().transform(np.abs).to_numpy().T
 
     return 0
 
