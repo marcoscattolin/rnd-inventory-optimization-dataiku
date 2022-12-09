@@ -9,6 +9,9 @@ Install the environment first:
 
      pipenv install -r requirements.txt
 
+Run tests:
+
+     pytest
 
 Below we have written the optimization objective and constraints.
 
