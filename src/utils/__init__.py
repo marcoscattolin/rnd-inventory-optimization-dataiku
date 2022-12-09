@@ -1,2 +1,2 @@
-from utils.data_generator import generate_demand_nodes, generate_supply, generate_itemsets, generate_shipping, generate_supply_nodes
-from utils.pretty_display import numpy_to_pandas_pretty, display_side_by_side
+from ..utils.data_generator import generate_demand_nodes, generate_supply, generate_itemsets, generate_shipping, generate_supply_nodes
+from ..utils.pretty_display import numpy_to_pandas_pretty, display_side_by_side

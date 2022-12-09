@@ -1,1 +1,1 @@
-from data_initialization.DataInit import DataInit
+from ..data_initialization.DataInit import DataInit

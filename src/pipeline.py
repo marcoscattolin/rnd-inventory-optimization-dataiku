@@ -1,7 +1,7 @@
-from data_initialization import DataInit
-from variable_initialization import VariableOptInit
-import constraints
-import objective_function
+from .data_initialization import DataInit
+from .variable_initialization import VariableOptInit
+from . import constraints
+from . import objective_function
 
 
 

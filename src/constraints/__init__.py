@@ -1,1 +1,1 @@
-from constraints.constraints import first_equation, second_equation, third_equation, fourth_equation, fifth_equation
+from ..constraints.constraints import first_equation, second_equation, third_equation, fourth_equation, fifth_equation

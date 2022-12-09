@@ -1,1 +1,1 @@
-from objective_function.objective_function import declare_objective
+from ..objective_function.objective_function import declare_objective
