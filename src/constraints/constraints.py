@@ -1,9 +1,9 @@
 import itertools
 
 
-def first_equation(variable_init, data_init):
+def first_constraint(variable_init, data_init):
   for j, k in itertools.product(data_init.DEMAND_NODE_IDS, data_init.ITEMSET_IDS):
-      constraint = variable_init.solver.RowConstraint(1, 1, f'equation 1: (j, k) = ({j}, {k})')
+      constraint = variable_init.solver.RowConstraint(1, 1, f'constraint 1: (j, k) = ({j}, {k})')
       for i in data_init.SUPPLY_NODE_IDS:
         constraint.SetCoefficient(variable_init.z[i, j, k], 1)
 
@@ -12,14 +12,14 @@ def first_equation(variable_init, data_init):
 #######################
 #######################
 
-def second_equation(variable_init, data_init):
+def second_constraint(variable_init, data_init):
 
   infinity = variable_init.solver.infinity()
 
 
   for i, j, k in itertools.product(data_init.SUPPLY_NODE_IDS, data_init.DEMAND_NODE_IDS, data_init.ITEMSET_IDS):
     
-    constraint = variable_init.solver.RowConstraint(-infinity, 0, f'equation 2: z({i},{j},{k})')
+    constraint = variable_init.solver.RowConstraint(-infinity, 0, f'constraint 2: z({i},{j},{k})')
     constraint.SetCoefficient(variable_init.z[i, j, k], data_init.demand_nodes[j, k]['demand'])
     constraint.SetCoefficient(variable_init.x[i, j, k], -1)
 
@@ -30,13 +30,13 @@ def second_equation(variable_init, data_init):
 #######################
 
 
-def third_equation(variable_init, data_init):
+def third_constraint(variable_init, data_init):
 
   infinity = variable_init.solver.infinity()
   
   
   for i, r in itertools.product(data_init.SUPPLY_NODE_IDS, data_init.SKU_IDS):
-    constraint = variable_init.solver.RowConstraint(-infinity, data_init.supply[i, r]['current_quantity'], 'equation 3:')
+    constraint = variable_init.solver.RowConstraint(-infinity, data_init.supply[i, r]['current_quantity'], 'constraint 3:')
 
     for j, k in itertools.product(data_init.DEMAND_NODE_IDS, data_init.ITEMSET_IDS):
       if (k, r) in data_init.itemsets:
@@ -50,12 +50,12 @@ def third_equation(variable_init, data_init):
 #######################
 
 
-def fourth_equation(variable_init, data_init):
+def fourth_constraint(variable_init, data_init):
 
   infinity = variable_init.solver.infinity()
 
   for i, r in itertools.product(data_init.SUPPLY_NODE_IDS, data_init.SKU_IDS):
-    constraint = variable_init.solver.RowConstraint(-infinity, -data_init.supply[i, r]['current_quantity'], 'equation 4:')
+    constraint = variable_init.solver.RowConstraint(-infinity, -data_init.supply[i, r]['current_quantity'], 'constraint 4:')
 
     for j, k in itertools.product(data_init.DEMAND_NODE_IDS, data_init.ITEMSET_IDS):
       if (k, r) in data_init.itemsets:
@@ -70,7 +70,7 @@ def fourth_equation(variable_init, data_init):
 #######################
 
 
-def fifth_equation(variable_init, data_init):
+def fifth_constraint(variable_init, data_init):
 
   infinity = variable_init.solver.infinity()
 
