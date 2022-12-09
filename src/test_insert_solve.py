@@ -51,7 +51,7 @@ def test_0_itemsets():
     assert np.allclose(dict_to_test['itemsets_output'][0], np.array([[5, 0, 0], [0, 5, 0], [0, 0, 5]]))
 
 
-def test_1_skus():
+def test_0_skus():
 
     data = data_for_unittest_0()
 
@@ -60,7 +60,7 @@ def test_1_skus():
     assert np.allclose(dict_to_test['procurement_output'], np.array([[0, 0], [0, 0], [0, 0]]))
 
 
-def test_1_objective_value():
+def test_0_objective_value():
 
     data = data_for_unittest_0()
 
