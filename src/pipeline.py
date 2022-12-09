@@ -7,6 +7,8 @@ from . import objective_function
 
 def insert_solve(shipping_df, itemsets_df, supply_nodes_df, supply_df, demand_nodes_df): 
   
+
+
   data_init = DataInit(shipping_df, itemsets_df, supply_nodes_df, supply_df, demand_nodes_df)
   data_init.check_demand()
   variable_init = VariableOptInit('SCIP', data_init)
@@ -15,13 +17,16 @@ def insert_solve(shipping_df, itemsets_df, supply_nodes_df, supply_df, demand_no
   constraints.third_constraint(variable_init, data_init)
   constraints.fourth_constraint(variable_init, data_init)
   constraints.fifth_constraint(variable_init, data_init)
+ 
   objective = objective_function.declare_objective(variable_init, data_init)
+
   variable_init.solve(objective)
-  assert variable_init.verify_solution() == True, 'solution not verified'
   
-  
+  # assert variable_init.verify_solution() == True, 'solution not verified'
+  print("STATUS ", variable_init.status)
   
   objective_value = variable_init.objective_value
+
 
   itemsets_output = {}
 
@@ -29,6 +34,8 @@ def insert_solve(shipping_df, itemsets_df, supply_nodes_df, supply_df, demand_no
     itemsets_output[i] = variable_init.get_itemset_results(i)
 
   procurement_output = variable_init.get_quantity_results()
+
+ 
 
   return {
       'itemsets_output' : itemsets_output,
