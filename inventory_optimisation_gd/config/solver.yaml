@@ -1,0 +1,3 @@
+solver: 'SCIP'
+mip_gap: 0.05
+verbose: True

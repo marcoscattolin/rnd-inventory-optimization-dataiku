@@ -1,0 +1,29 @@
+# columns mapping
+demad_file:
+  file_name: 'demand_nodes.csv'
+  col_demand_demand_node_id: 'node_id'
+  col_demand_itemset_id: 'itemset_id'
+  col_demand_demand_mean: 'demand_mean'
+
+itemset_file:
+  file_name: 'itemsets.csv'
+  col_itemsets_itemset_id: 'itemset_id'
+  col_itemsets_sku_id: 'sku_id'
+
+shipping_file:
+  file_name: 'shipping.csv'
+  col_shipping_source_node_id: 'source_node_id'
+  col_shipping_destination_node_id: 'destination_node_id'
+  col_shipping_cost: 'cost'
+
+capacity_file:
+  file_name: 'supply_nodes.csv'
+  col_capacity_supply_node_id: 'node_id'
+  col_capacity_capacity: 'capacity'
+
+supply_file:
+  file_name: 'supply.csv'
+  col_supply_supply_node_id: 'node_id'
+  col_supply_sku_id: 'sku_id'
+  col_supply_cost: 'cost'
+  col_supply_current_quantity: 'current_quantity'
