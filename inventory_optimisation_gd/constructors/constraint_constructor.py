@@ -7,7 +7,7 @@ class ConstraintManager():
         self,
         data,
         solver,
-        variables
+        variables,
     ):
         self.data = data
         self.solver = solver
@@ -24,7 +24,9 @@ class ConstraintManager():
         
         for store, itemset in self.data.DEMAND_NODE_IDS_ITEMSET_IDS:
             constraint = self.solver.solver.RowConstraint(
-                self.data.demand_nodes[store, itemset]['demand_mean'], 
+                self.data.demand_nodes[store, itemset][
+                    self.data.demand_schema['col_demand_demand_mean']
+                ], 
                 self.infinity, 
                 f'equation 1 ({store}, {itemset}): \
                 number of demand itemset {itemset} at store {store}'
@@ -40,7 +42,9 @@ class ConstraintManager():
             self.data.SUPPLY_NODE_IDS, self.data.SKU_IDS):
             constraint = self.solver.solver.RowConstraint(
                 -self.infinity, 
-                self.data.supply[warehouse, sku]['current_quantity'], 
+                self.data.supply[warehouse, sku][
+                    self.data.supply_schema['col_supply_current_quantity']
+                    ], 
                 f'equation 2 ({warehouse}, {sku}): number of procurement of \
                 {sku} sku at {warehouse} warehouse'
             )
@@ -62,7 +66,9 @@ class ConstraintManager():
             self.data.SUPPLY_NODE_IDS, self.data.SKU_IDS):
             constraint = self.solver.solver.RowConstraint(
                 
-                self.data.supply[warehouse, sku]['current_quantity'], 
+                self.data.supply[warehouse, sku][
+                    self.data.supply_schema['col_supply_current_quantity']
+                ], 
                 self.infinity, 
                 f'equation 3 ({warehouse}, {sku}): number of unused {sku} sku \
                 at {warehouse} warehouse'
@@ -83,7 +89,9 @@ class ConstraintManager():
         for warehouse in self.data.SUPPLY_NODE_IDS:
             constraint = self.solver.solver.RowConstraint(
                 -self.infinity, 
-                self.data.supply_nodes[warehouse]['capacity'],
+                self.data.supply_nodes[warehouse][
+                    self.data.supply_nodes_schema['col_capacity_capacity']
+                    ],
                 f'equation 4 ({warehouse}): capacity at {warehouse} warehouse'
             )
 

@@ -18,7 +18,9 @@ class ObjectiveManager():
                 self.objective.SetCoefficient(
                     self.variables.x[warehouse, store, itemset], 
                     self.data.itemset_sku_id_count[itemset]*
-                    self.data.shipping[warehouse, store]['cost']
+                    self.data.shipping[warehouse, store][
+                        self.data.shipping_schema['col_shipping_cost']
+                        ]
                 )
 
         for warehouse, sku in itertools.product(
@@ -26,7 +28,9 @@ class ObjectiveManager():
         ):
             self.objective.SetCoefficient(
                 self.variables.y[warehouse, sku], 
-                self.data.supply[warehouse, sku]['cost']
+                self.data.supply[warehouse, sku][
+                    self.data.supply_schema['col_supply_cost']
+                    ]
             )
 
         self.objective.SetMinimization()

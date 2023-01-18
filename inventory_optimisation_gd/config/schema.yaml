@@ -1,29 +1,34 @@
 # columns mapping
-demad_file:
+demand_file:
   file_name: 'demand_nodes.csv'
-  col_demand_demand_node_id: 'node_id'
-  col_demand_itemset_id: 'itemset_id'
+  col_demand_demand_node_id: 'forecast_granularity' #'node_id'
+  col_demand_itemset_id: 'product_set_id' #'itemset_id'
   col_demand_demand_mean: 'demand_mean'
 
 itemset_file:
-  file_name: 'itemsets.csv'
-  col_itemsets_itemset_id: 'itemset_id'
-  col_itemsets_sku_id: 'sku_id'
+  file_name: 'product_sets.csv'
+  col_itemsets_itemset_id: 'product_set_id' #'itemset_id'
+  col_itemsets_sku_id: 'product_id' #'sku_id'
 
 shipping_file:
-  file_name: 'shipping.csv'
-  col_shipping_source_node_id: 'source_node_id'
-  col_shipping_destination_node_id: 'destination_node_id'
-  col_shipping_cost: 'cost'
+  file_name: 'warehouse_shipping_costs.csv'
+  col_shipping_source_node_id: 'warehouse_id' # 'source_node_id'
+  col_shipping_destination_node_id: 'forecast_granularity' #'destination_node_id'
+  col_shipping_cost: 'product_shipping_cost' # 'cost'
 
 capacity_file:
-  file_name: 'supply_nodes.csv'
-  col_capacity_supply_node_id: 'node_id'
-  col_capacity_capacity: 'capacity'
+  file_name: 'warehouses.csv'
+  col_capacity_supply_node_id: 'warehouse_id' # 'node_id'
+  col_capacity_capacity: 'location_capacity' # 'capacity'
 
 supply_file:
-  file_name: 'supply.csv'
-  col_supply_supply_node_id: 'node_id'
-  col_supply_sku_id: 'sku_id'
-  col_supply_cost: 'cost'
-  col_supply_current_quantity: 'current_quantity'
+  file_name: 'warehouses_inventory.csv'
+  col_supply_supply_node_id: 'warehouse_id' # 'node_id'
+  col_supply_sku_id: 'product_id' # 'sku_id'
+  col_supply_cost: 'product_unit_procurement_cost' # 'cost'
+  col_supply_current_quantity: 'product_stock_in_warehouses' # 'current_quantity'
+
+output_column:
+  quantity: 'product_stock_quantity'
+  procurement_quantity: 'product_stock_procurement_quantity'
+  unused_quantity: 'excess_product_stock_in_warehouses'
