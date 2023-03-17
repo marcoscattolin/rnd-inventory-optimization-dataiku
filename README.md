@@ -15,25 +15,29 @@ Run tests:
 
 Below we have written the optimization objective and constraints.
 
-$$\text{min}\sum_i\sum_j\sum_k x_{i,j,k} \cdot n_k \cdot shipping_{i,j} + \sum_i \sum_r y_{i,r} \cdot procurement_{i,r}$$
+$$\begin{aligned}
+\underset{x}{\text{minimize}}\quad &\sum_{i}^{N}\sum_{j}^{M}\sum_{k}^{K}x_{i,j,k}*n_{k}*shipping_{i,j} + \sum_{i}^{N}\sum_{r}^{R}y_{i,r}*procurement_{i,r}\\
+\text{subject to}\quad &\\
+& \sum_{i}^{N}x_{i,j,k}\geq d_{j,k}, \quad \forall (j,k) \\
+& \sum_{j}^{N}\sum_{k’}x_{i,j,k’}*n_{k’,r} - q_{i,r} \leq y_{i,r}\quad \forall r,i \\
+& q_{i,r} - \sum_{j}^{M}\sum_{k’}x_{i,j,k’}*n_{k’,r}\leq v_{i,r}\quad \forall r,i \\
+& \sum_{j}^{N}\sum_{k}^{K}x_{i,j,k}*n_{k}+\sum_{r}^{R}v_{i,r}\leq capacity_{i}\quad \forall i \\
+& x_{i,j,k}\quad, \quad y_{i,r}\quad, \quad v_{i,r} \in \mathbb{W}
+\end{aligned}$$
 
-constraint:
-
-$$\sum_{i} z_{i,j,k} = 1 \;\;\; \forall(j, k)$$
-
-$$z_{i,j,k} \cdot d_{j, k} \leq x_{i,j,k} \;\;\; \forall(i, j, k)$$
-
-$$\sum_j\sum_{k'}x_{i, j, k'} - q_{i ,r} \leq y_{i, r} \;\;\; \forall(i, r)$$
-
-$$q_{i ,r}  - \sum_j\sum_{k'}x_{i, j, k'} \leq v_{i, r} \;\;\; \forall(i, r)$$
-
-$$\sum_j\sum_{k'}x_{i, j, k'} \cdot n_k + \sum_r v_{i,r} \leq capacity_i \;\; \forall i$$
-
-
-$z_{i,j,k} \in [0, 1]$
-$x_{i,j,k} \in \mathbb{N_0}$,
-$y_{i,r} \in \mathbb{N_0}$,
-$v_{i,r} \in \mathbb{N_0}$
+$x_{i,j,k}$ - decision variable, stand for number of product sets k that will be delivered from warehouse i to store j\
+$y_{i,r}$- decision variable, stands for number of procurement skus r in distributive center i\
+$v_{i,r}$- variables that represent number of unused skus r that is going to left stored in warehouse i\
+$capacity_{i}$- capacity of wearhouse i\
+$shipping_{i,j}$- cost of shipping sku unit from wearhouse i to warehouse j\
+$procurement_{i,r}$- cost of procurement of sku r in warehouse i\
+$d_{j,k}$- demand of product sets k in store j\
+$q_{i,r}$- current quantity of sku r in warehouse i\
+$n_{k,r}$- total number of sku r in product sets k\
+$i$- index of warehouse\
+$j$ - index of store\
+$k$- index of product set\
+$r$- index of sku\
 
 ## License
 
