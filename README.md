@@ -57,4 +57,4 @@ limitations under the License.
 
 - Marko Nikolic, `mnikolic@griddynamics.com`
 - Dejan Dzunja, `ddzunja@griddynamics.com`
-- Andrei Novikov, `annovikov@griddynamics.com`
+- Andriy Drebot, `adrebot@griddynamics.com`
