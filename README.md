@@ -37,7 +37,7 @@ $n_{k,r}$- total number of sku r in product sets k\
 $i$- index of warehouse\
 $j$ - index of store\
 $k$- index of product set\
-$r$- index of sku\
+$r$- index of sku
 
 ## License
 
