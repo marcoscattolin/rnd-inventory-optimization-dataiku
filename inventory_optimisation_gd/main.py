@@ -106,3 +106,5 @@ if __name__ == '__main__':
     solution.df_warehouse_sku_proc.to_excel(writer, sheet_name='solution_warehouse_sku_proc')
     solution.df_warehouse_sku_left.to_excel(writer, sheet_name='solution_warehouse_sku_left')
 
+    writer.close()
+
