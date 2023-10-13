@@ -73,12 +73,19 @@ if __name__ == '__main__':
         'data'
     )
 
+
+    shipping_cost = pd.read_csv(os.path.join(path, schema_config['shipping_file']['file_name']))
+    itemset = pd.read_csv(os.path.join(path, schema_config['itemset_file']['file_name']))
+    capacity = pd.read_csv(os.path.join(path, schema_config['capacity_file']['file_name']))
+    supply = pd.read_csv(os.path.join(path, schema_config['supply_file']['file_name']))
+    demand = pd.read_csv(os.path.join(path, schema_config['demand_file']['file_name']))
+
     solution = pipeline(
-        pd.read_csv(os.path.join(path, schema_config['shipping_file']['file_name'])),
-        pd.read_csv(os.path.join(path, schema_config['itemset_file']['file_name'])),
-        pd.read_csv(os.path.join(path, schema_config['capacity_file']['file_name'])),
-        pd.read_csv(os.path.join(path, schema_config['supply_file']['file_name'])),
-        pd.read_csv(os.path.join(path, schema_config['demand_file']['file_name'])),
+        shipping_cost,
+        itemset,
+        capacity,
+        supply,
+        demand,
         config
     )
 
@@ -86,9 +93,16 @@ if __name__ == '__main__':
     # init pandas excel writer
     writer = pd.ExcelWriter(os.path.join(path, 'solution.xlsx'), engine='xlsxwriter')
 
+    # inputs
+    shipping_cost.to_excel(writer, sheet_name='input_shipping_cost')
+    itemset.to_excel(writer, sheet_name='input_itemset')
+    capacity.to_excel(writer, sheet_name='input_capacity')
+    supply.to_excel(writer, sheet_name='input_supply')
+    demand.to_excel(writer, sheet_name='input_demand')
+
     # write sheets
-    solution.df_warehouse_store_qty.to_excel(writer, sheet_name='warehouse_store_qty')
-    solution.df_warehouse_sku_qty.to_excel(writer, sheet_name='warehouse_sku_qty')
-    solution.df_warehouse_sku_proc.to_excel(writer, sheet_name='warehouse_sku_proc')
-    solution.df_warehouse_sku_left.to_excel(writer, sheet_name='warehouse_sku_left')
+    solution.df_warehouse_store_qty.to_excel(writer, sheet_name='solution_warehouse_store_qty')
+    solution.df_warehouse_sku_qty.to_excel(writer, sheet_name='solution_warehouse_sku_qty')
+    solution.df_warehouse_sku_proc.to_excel(writer, sheet_name='solution_warehouse_sku_proc')
+    solution.df_warehouse_sku_left.to_excel(writer, sheet_name='solution_warehouse_sku_left')
 
