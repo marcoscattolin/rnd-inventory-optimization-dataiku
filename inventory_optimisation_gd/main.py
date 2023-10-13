@@ -83,7 +83,12 @@ if __name__ == '__main__':
     )
 
     # print solution
-    print(solution.df_warehouse_sku_qty)
-    print(solution.df_warehouse_store_qty)
-    print(solution.df_warehouse_sku_proc)
-    print(solution.cost)
+    # init pandas excel writer
+    writer = pd.ExcelWriter(os.path.join(path, 'solution.xlsx'), engine='xlsxwriter')
+
+    # write sheets
+    solution.df_warehouse_store_qty.to_excel(writer, sheet_name='warehouse_store_qty')
+    solution.df_warehouse_sku_qty.to_excel(writer, sheet_name='warehouse_sku_qty')
+    solution.df_warehouse_sku_proc.to_excel(writer, sheet_name='warehouse_sku_proc')
+    solution.df_warehouse_sku_left.to_excel(writer, sheet_name='warehouse_sku_left')
+
