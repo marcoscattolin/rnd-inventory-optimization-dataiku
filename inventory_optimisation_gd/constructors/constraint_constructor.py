@@ -22,6 +22,7 @@ class ConstraintManager():
     
     def first_equation(self):
         
+        # la somma delle spedizioni dai warehouse è maggiore o uguale alla domanda in ogni store, itemset
         for store, itemset in self.data.DEMAND_NODE_IDS_ITEMSET_IDS:
             constraint = self.solver.solver.RowConstraint(
                 self.data.demand_nodes[store, itemset][
@@ -31,13 +32,15 @@ class ConstraintManager():
                 f'equation 1 ({store}, {itemset}): \
                 number of demand itemset {itemset} at store {store}'
             )
+            # per ogni (store, itemset, warehouse) creo una variabile decisonale con coefficiente 1 che varrà la quantità di itemset da spedire
             for warehouse in self.data.SUPPLY_NODE_IDS:
                 constraint.SetCoefficient(
                     self.variables.x[warehouse, store, itemset], 1)
 
                 
     def second_equation(self):
-        
+
+        # per ogni warehouse, sku: la somma delle spedizioni meno ciò che ho in magazzino (ie. fabbisogno) è minore o uguale a variabile decisionale y (ie. ciò che devo acquistare procurement)
         for warehouse, sku in itertools.product(
             self.data.SUPPLY_NODE_IDS, self.data.SKU_IDS):
             constraint = self.solver.solver.RowConstraint(
@@ -48,7 +51,7 @@ class ConstraintManager():
                 f'equation 2 ({warehouse}, {sku}): number of procurement of \
                 {sku} sku at {warehouse} warehouse'
             )
-
+            # TODO unclear
             for itemset in self.data.query_itemsets_by_sku[sku]:
                 try:
                     for store in self.data.query_stores_by_itemset[itemset]:
@@ -62,6 +65,7 @@ class ConstraintManager():
             
     def third_equation(self):
 
+        # per ogni warehouse, sku: la somma di ciò che ho in magazzino meno ciò che spedisco è minore o uguale a variabile decisionale v (ie. ciò che resta in magazzino)
         for warehouse, sku in itertools.product(
             self.data.SUPPLY_NODE_IDS, self.data.SKU_IDS):
             constraint = self.solver.solver.RowConstraint(
@@ -86,6 +90,7 @@ class ConstraintManager():
 
     def fourth_equation(self):
 
+        # per ogni magazzino la somma di ciò che spedisco + ciò che mi rimane non supera la capacity
         for warehouse in self.data.SUPPLY_NODE_IDS:
             constraint = self.solver.solver.RowConstraint(
                 -self.infinity, 
