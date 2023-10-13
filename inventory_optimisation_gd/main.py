@@ -72,7 +72,8 @@ if __name__ == '__main__':
             ), 
         'data'
     )
-    pipeline(
+
+    solution = pipeline(
         pd.read_csv(os.path.join(path, schema_config['shipping_file']['file_name'])),
         pd.read_csv(os.path.join(path, schema_config['itemset_file']['file_name'])),
         pd.read_csv(os.path.join(path, schema_config['capacity_file']['file_name'])),
@@ -80,3 +81,9 @@ if __name__ == '__main__':
         pd.read_csv(os.path.join(path, schema_config['demand_file']['file_name'])),
         config
     )
+
+    # print solution
+    print(solution.df_warehouse_sku_qty)
+    print(solution.df_warehouse_store_qty)
+    print(solution.df_warehouse_sku_proc)
+    print(solution.cost)
