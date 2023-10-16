@@ -44,6 +44,8 @@ def load_data():
 
 def init_model(data):
 
+    print("Initializing model")
+
     model = ConcreteModel()
 
     # unpack model
@@ -89,11 +91,13 @@ def init_model(data):
         return sum(model.x[(i, j, k)] * itemset_sku_id_count[k] for j in demand_ids for k in itemset_ids) + sum(m.v[(i, r)] for r in sku_ids) <= data.supply_nodes[i]['location_capacity']
     model.eq4 = Constraint(supply_ids, rule=eq4)
 
-    return model
+    print("Done!")
 
+    return model
 
 
 data = load_data()
 model = init_model(data)
-SolverFactory('glpk').solve(model)
-
+print("Solving")
+solution = SolverFactory('glpk').solve(model)
+print("Done!")
