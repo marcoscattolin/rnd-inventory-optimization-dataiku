@@ -4,11 +4,12 @@ import sys
 import yaml
 from pathlib import Path
 from inventory_optimisation_gd.constructors.data_constructor import DataManager
-from pyomo.environ import Objective, ConcreteModel, Var, SolverFactory, Constraint, minimize, NonNegativeIntegers, NonPositiveIntegers, value
+from pyomo.environ import Objective, ConcreteModel, Var, SolverFactory, Constraint, minimize, NonNegativeIntegers, NonPositiveIntegers, value, Set
 
 
 def load_data():
 
+    print("Loading data...")
     dir_path = Path(__file__).parent.parent
     dir_path = os.path.join(dir_path, 'inventory_optimisation_gd')
     sys.path.insert(0, os.path.dirname(dir_path))
@@ -39,21 +40,22 @@ def load_data():
 
     data_init = DataManager(shipping_df=shipping_cost, itemsets_df=itemset, supply_nodes_df=capacity, supply_df=supply, demand_nodes_df=demand, config=config)
 
+    print("Done!")
+
     return data_init
 
 
 def init_model(data):
 
-    print("Initializing model")
+    print("Initializing model...")
 
     model = ConcreteModel()
 
-    # unpack model
-    demand_ids = data.DEMAND_NODE_IDS
-    itemset_ids = data.ITEMSET_IDS
-    supply_ids = data.SUPPLY_NODE_IDS
-    sku_ids = data.SKU_IDS
-    itemset_sku_id_count = data.itemset_sku_id_count
+    model.x_set = Set(initialize=[(i, j) for i, j in data.DEMAND_NODE_IDS_ITEMSET_IDS])
+    model.x = Var(data.SUPPLY_NODE_IDS, model.x_set, within=NonNegativeIntegers)
+
+    model.y = Var(data.SUPPLY_NODE_IDS, data.SKU_IDS, within=NonNegativeIntegers)
+    model.v = Var(data.SUPPLY_NODE_IDS, data.SKU_IDS, within=NonNegativeIntegers)
 
     shipping_cost = {}
     for key, value in data.shipping.items():
@@ -65,31 +67,28 @@ def init_model(data):
         procurement_cost[key] = value['product_unit_procurement_cost']
         q[key] = value['product_stock_in_warehouses']
 
-    model.x = Var(supply_ids, demand_ids, itemset_ids, within=NonNegativeIntegers)
-    model.y = Var(supply_ids, sku_ids, within=NonNegativeIntegers)
-    model.v = Var(supply_ids, sku_ids, within=NonNegativeIntegers)
-    # define the objective function
-    model.value = Objective(expr=sum((model.x[(i, j, k)] * shipping_cost[(i, j)] * itemset_sku_id_count[k]) for i in supply_ids for j in demand_ids for k in itemset_ids) + sum(model.y[(i, r)] * procurement_cost[(i, r)] for i in supply_ids for r in sku_ids), sense=minimize)
+    model.value = Objective(expr=sum((model.x[(i, j, k)] * shipping_cost[(i, j)] * data.itemset_sku_id_count[k]) for i in data.SUPPLY_NODE_IDS for j, k in data.DEMAND_NODE_IDS_ITEMSET_IDS) + sum(model.y[(i, r)] * procurement_cost[(i, r)] for i in data.SUPPLY_NODE_IDS for r in data.SKU_IDS), sense=minimize)
 
     def eq0(m, i, r):
-        return m.v[(i, r)] == q[(i, r)] + m.y[(i, r)] - sum(m.x[(i, j, k)] * itemset_sku_id_count[k] for j in demand_ids for k in data.query_itemsets_by_sku[r])
-    model.eq0 = Constraint(supply_ids, sku_ids, rule=eq0)
+        return m.v[(i, r)] == q[(i, r)] + m.y[(i, r)] - sum(m.x[(i, j, k)] * data.itemset_sku_id_count[k] for j, k in data.DEMAND_NODE_IDS_ITEMSET_IDS)
+
+    model.eq0 = Constraint(data.SUPPLY_NODE_IDS, data.SKU_IDS, rule=eq0)
 
     def eq1(m, j, k):
-        return sum(m.x[(i, j, k)] for i in supply_ids) <= data.demand_nodes[(j, k)]['demand_mean']
-    model.eq1 = Constraint(demand_ids, itemset_ids, rule=eq1)
+        return sum(m.x[(i, j, k)] for i in data.SUPPLY_NODE_IDS) <= data.demand_nodes[(j, k)]['demand_mean']
+    model.eq1 = Constraint(model.x_set, rule=eq1)
 
     def eq2(m, r, i):
-        return sum(m.x[(i, j, k)] * itemset_sku_id_count[k] for j in demand_ids for k in data.query_itemsets_by_sku[r]) - q[(i, r)] <= m.y[(i, r)]
-    model.eq2 = Constraint(sku_ids, supply_ids, rule=eq2)
+        return sum(m.x[(i, j, k)] * data.itemset_sku_id_count[k] for j, k in data.DEMAND_NODE_IDS_ITEMSET_IDS) - q[(i, r)] <= m.y[(i, r)]
+    model.eq2 = Constraint(data.SKU_IDS, data.SUPPLY_NODE_IDS, rule=eq2)
 
     def eq3(m, r, i):
-        return q[(i, r)] - sum(m.x[(i, j, k)] * itemset_sku_id_count[k] for j in demand_ids for k in data.query_itemsets_by_sku[r]) <= m.v[(i, r)]
-    model.eq3 = Constraint(sku_ids, supply_ids, rule=eq3)
+        return q[(i, r)] - sum(m.x[(i, j, k)] * data.itemset_sku_id_count[k] for j, k in data.DEMAND_NODE_IDS_ITEMSET_IDS) <= m.v[(i, r)]
+    model.eq3 = Constraint(data.SKU_IDS, data.SUPPLY_NODE_IDS, rule=eq3)
 
     def eq4(m, i):
-        return sum(model.x[(i, j, k)] * itemset_sku_id_count[k] for j in demand_ids for k in itemset_ids) + sum(m.v[(i, r)] for r in sku_ids) <= data.supply_nodes[i]['location_capacity']
-    model.eq4 = Constraint(supply_ids, rule=eq4)
+        return sum(model.x[(i, j, k)] * data.itemset_sku_id_count[k] for j, k in data.DEMAND_NODE_IDS_ITEMSET_IDS) + sum(m.v[(i, r)] for r in data.SKU_IDS) <= data.supply_nodes[i]['location_capacity']
+    model.eq4 = Constraint(data.SUPPLY_NODE_IDS, rule=eq4)
 
     print("Done!")
 
@@ -97,6 +96,8 @@ def init_model(data):
 
 
 def save_data(model):
+
+    print("Saving data...")
 
     # x variables
     keys = list(model.x.keys())
@@ -137,15 +138,15 @@ def save_data(model):
     df_v.to_excel(writer, sheet_name='solution_warehouse_sku_left')
     writer.close()
 
-    print("Saved")
+    print("Done!")
 
 
+if __name__ == '__main__':
 
-
-data = load_data()
-model = init_model(data)
-print("Solving")
-SolverFactory('glpk').solve(model)
-save_data(model)
-print("Done!")
+    data = load_data()
+    model = init_model(data)
+    print("Solving")
+    SolverFactory('glpk').solve(model)
+    save_data(model)
+    print("Done!")
 
