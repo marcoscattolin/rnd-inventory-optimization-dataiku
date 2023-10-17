@@ -56,9 +56,6 @@ def init_model(data):
     model.skus = Set(initialize=data.SKU_IDS)
     model.store_itemsets = Set(initialize=[(i, j) for i, j in data.DEMAND_NODE_IDS_ITEMSET_IDS])
 
-    model.x = Var(model.warehouses, model.store_itemsets, within=NonNegativeIntegers)
-    model.y = Var(data.SUPPLY_NODE_IDS, data.SKU_IDS, within=NonNegativeIntegers)
-    model.v = Var(data.SUPPLY_NODE_IDS, data.SKU_IDS, within=NonNegativeIntegers)
 
     shipping_cost = {}
     for key, value in data.shipping.items():
@@ -80,8 +77,15 @@ def init_model(data):
     for key, val in data.supply_nodes.items():
         capacity[key] = val['location_capacity']
 
+    # variables
+    model.x = Var(model.warehouses, model.store_itemsets, within=NonNegativeIntegers)
+    model.y = Var(data.SUPPLY_NODE_IDS, data.SKU_IDS, within=NonNegativeIntegers)
+    model.v = Var(data.SUPPLY_NODE_IDS, data.SKU_IDS, within=NonNegativeIntegers)
+
+    # objective function
     model.value = Objective(expr=sum((model.x[(i, j, k)] * shipping_cost[(i, j)] * itemset_sku_id_count[k]) for i in model.warehouses for j, k in model.store_itemsets) + sum(model.y[(i, r)] * procurement_cost[(i, r)] for i in model.warehouses for r in model.skus), sense=minimize)
 
+    # constraints
     def eq1(m, j, k):
         return sum(m.x[(i, j, k)] for i in model.warehouses) >= demand[(j, k)]
     model.eq1 = Constraint(model.store_itemsets, rule=eq1)
