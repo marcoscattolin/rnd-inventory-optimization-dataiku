@@ -91,11 +91,15 @@ def init_model(data):
     model.eq1 = Constraint(model.store_itemsets, rule=eq1)
 
     def eq2(m, r, i):
-        return sum(m.x[(i, j, k)] * itemset_sku_id_count[k] for j, k in model.store_itemsets) - q[(i, r)] <= m.y[(i, r)]
+        small_itemsets = data.query_itemsets_by_sku[r]
+        small_store_itemsets = [(j, k) for j, k in model.store_itemsets if k in small_itemsets]
+        return sum(m.x[(i, j, k)] * itemset_sku_id_count[k] for j, k in small_store_itemsets) - q[(i, r)] <= m.y[(i, r)]
     model.eq2 = Constraint(model.skus, model.warehouses, rule=eq2)
 
     def eq3(m, r, i):
-        return q[(i, r)] - sum(m.x[(i, j, k)] * itemset_sku_id_count[k] for j, k in model.store_itemsets) <= m.v[(i, r)]
+        small_itemsets = data.query_itemsets_by_sku[r]
+        small_store_itemsets = [(j, k) for j, k in model.store_itemsets if k in small_itemsets]
+        return q[(i, r)] - sum(m.x[(i, j, k)] * itemset_sku_id_count[k] for j, k in small_store_itemsets) <= m.v[(i, r)]
     model.eq3 = Constraint(model.skus, model.warehouses, rule=eq3)
 
     def eq4(m, i):
