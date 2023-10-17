@@ -50,10 +50,13 @@ def init_model(data):
     print("Initializing model...")
 
     model = ConcreteModel()
+    model.warehouses = Set(initialize=data.SUPPLY_NODE_IDS)
+    model.stores = Set(initialize=data.DEMAND_NODE_IDS)
+    model.itemsets = Set(initialize=data.ITEMSET_IDS)
+    model.skus = Set(initialize=data.SKU_IDS)
+    model.store_itemsets = Set(initialize=[(i, j) for i, j in data.DEMAND_NODE_IDS_ITEMSET_IDS])
 
-    model.x_set = Set(initialize=[(i, j) for i, j in data.DEMAND_NODE_IDS_ITEMSET_IDS])
-    model.x = Var(data.SUPPLY_NODE_IDS, model.x_set, within=NonNegativeIntegers)
-
+    model.x = Var(model.warehouses, model.store_itemsets, within=NonNegativeIntegers)
     model.y = Var(data.SUPPLY_NODE_IDS, data.SKU_IDS, within=NonNegativeIntegers)
     model.v = Var(data.SUPPLY_NODE_IDS, data.SKU_IDS, within=NonNegativeIntegers)
 
@@ -67,27 +70,32 @@ def init_model(data):
         procurement_cost[key] = value['product_unit_procurement_cost']
         q[key] = value['product_stock_in_warehouses']
 
-    model.value = Objective(expr=sum((model.x[(i, j, k)] * shipping_cost[(i, j)] * data.itemset_sku_id_count[k]) for i in data.SUPPLY_NODE_IDS for j, k in data.DEMAND_NODE_IDS_ITEMSET_IDS) + sum(model.y[(i, r)] * procurement_cost[(i, r)] for i in data.SUPPLY_NODE_IDS for r in data.SKU_IDS), sense=minimize)
+    demand = {}
+    for key, value in data.demand_nodes.items():
+        demand[key] = value['demand_mean']
 
-    def eq0(m, i, r):
-        return m.v[(i, r)] == q[(i, r)] + m.y[(i, r)] - sum(m.x[(i, j, k)] * data.itemset_sku_id_count[k] for j, k in data.DEMAND_NODE_IDS_ITEMSET_IDS)
+    itemset_sku_id_count = data.itemset_sku_id_count
 
-    model.eq0 = Constraint(data.SUPPLY_NODE_IDS, data.SKU_IDS, rule=eq0)
+    capacity = {}
+    for key, val in data.supply_nodes.items():
+        capacity[key] = val['location_capacity']
+
+    model.value = Objective(expr=sum((model.x[(i, j, k)] * shipping_cost[(i, j)] * itemset_sku_id_count[k]) for i in model.warehouses for j, k in model.store_itemsets) + sum(model.y[(i, r)] * procurement_cost[(i, r)] for i in model.warehouses for r in model.skus), sense=minimize)
 
     def eq1(m, j, k):
-        return sum(m.x[(i, j, k)] for i in data.SUPPLY_NODE_IDS) <= data.demand_nodes[(j, k)]['demand_mean']
-    model.eq1 = Constraint(model.x_set, rule=eq1)
+        return sum(m.x[(i, j, k)] for i in model.warehouses) >= demand[(j, k)]
+    model.eq1 = Constraint(model.store_itemsets, rule=eq1)
 
     def eq2(m, r, i):
-        return sum(m.x[(i, j, k)] * data.itemset_sku_id_count[k] for j, k in data.DEMAND_NODE_IDS_ITEMSET_IDS) - q[(i, r)] <= m.y[(i, r)]
-    model.eq2 = Constraint(data.SKU_IDS, data.SUPPLY_NODE_IDS, rule=eq2)
+        return sum(m.x[(i, j, k)] * itemset_sku_id_count[k] for j, k in model.store_itemsets) - q[(i, r)] <= m.y[(i, r)]
+    model.eq2 = Constraint(model.skus, model.warehouses, rule=eq2)
 
     def eq3(m, r, i):
-        return q[(i, r)] - sum(m.x[(i, j, k)] * data.itemset_sku_id_count[k] for j, k in data.DEMAND_NODE_IDS_ITEMSET_IDS) <= m.v[(i, r)]
-    model.eq3 = Constraint(data.SKU_IDS, data.SUPPLY_NODE_IDS, rule=eq3)
+        return q[(i, r)] - sum(m.x[(i, j, k)] * itemset_sku_id_count[k] for j, k in model.store_itemsets) <= m.v[(i, r)]
+    model.eq3 = Constraint(model.skus, model.warehouses, rule=eq3)
 
     def eq4(m, i):
-        return sum(model.x[(i, j, k)] * data.itemset_sku_id_count[k] for j, k in data.DEMAND_NODE_IDS_ITEMSET_IDS) + sum(m.v[(i, r)] for r in data.SKU_IDS) <= data.supply_nodes[i]['location_capacity']
+        return sum(model.x[(i, j, k)] * itemset_sku_id_count[k] for j, k in model.store_itemsets) + sum(m.v[(i, r)] for r in model.skus) <= capacity[i]
     model.eq4 = Constraint(data.SUPPLY_NODE_IDS, rule=eq4)
 
     print("Done!")
