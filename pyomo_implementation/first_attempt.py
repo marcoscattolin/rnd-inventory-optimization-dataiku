@@ -96,8 +96,56 @@ def init_model(data):
     return model
 
 
+def save_data(model):
+
+    # x variables
+    keys = list(model.x.keys())
+    index = pd.MultiIndex.from_tuples(keys, names=["supply_node_id", "demand_node_id", "itemset_id"])
+    df_x = pd.Series(index=index, dtype="float64")
+    for key in keys:
+        df_x[key] = value(model.x[key])
+    df_x = df_x.reset_index()
+
+    # y variables
+    keys = list(model.y.keys())
+    index = pd.MultiIndex.from_tuples(keys, names=["supply_node_id", "sku_id"])
+    df_y = pd.Series(index=index, dtype="float64")
+    for key in keys:
+        df_y[key] = value(model.y[key])
+    df_y = df_y.reset_index()
+
+    # v variables
+    keys = list(model.v.keys())
+    index = pd.MultiIndex.from_tuples(keys, names=["supply_node_id", "sku_id"])
+    df_v = pd.Series(index=index, dtype="float64")
+    for key in keys:
+        df_v[key] = value(model.v[key])
+    df_v = df_v.reset_index()
+
+    # init pandas excel writer
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    path = os.path.join(
+        os.path.abspath(
+            os.path.join(dir_path, os.pardir)
+            ),
+        'data'
+    )
+    writer = pd.ExcelWriter(os.path.join(path, 'pyomo_solution.xlsx'), engine='xlsxwriter')
+
+    df_x.to_excel(writer, sheet_name='solution_warehouse_store_qty')
+    df_y.to_excel(writer, sheet_name='solution_warehouse_sku_proc')
+    df_v.to_excel(writer, sheet_name='solution_warehouse_sku_left')
+    writer.close()
+
+    print("Saved")
+
+
+
+
 data = load_data()
 model = init_model(data)
 print("Solving")
-solution = SolverFactory('glpk').solve(model)
+SolverFactory('glpk').solve(model)
+save_data(model)
 print("Done!")
+
