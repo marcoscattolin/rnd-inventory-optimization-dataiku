@@ -152,9 +152,14 @@ def save_data(model):
 if __name__ == '__main__':
 
     data = load_data()
+
+    # init model
     model = init_model(data)
+
     print("Solving")
     SolverFactory('glpk').solve(model)
-    save_data(model)
     print("Done!")
+
+    # save data
+    save_data(model)
 
